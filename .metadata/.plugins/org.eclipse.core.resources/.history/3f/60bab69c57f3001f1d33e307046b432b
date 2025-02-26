@@ -1,0 +1,30 @@
+package com.project.Dashboard_service.Controller;
+
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/dashboard")
+public class DashboardController {
+
+    // In-memory list for demonstration
+    private List<DashboardProductDTO> products = new ArrayList<>();
+
+    // GET endpoint: Users can view all products
+    @GetMapping("/products")
+    public ResponseEntity<List<DashboardProductDTO>> viewProducts() {
+        return ResponseEntity.ok(products);
+    }
+
+    // POST endpoint: Sellers can add new products
+    @PostMapping("/products")
+    public ResponseEntity<DashboardProductDTO> addProduct(@RequestBody DashboardProductDTO product) {
+        // In a real application, check JWT claims to ensure the user is a seller
+        products.add(product);
+        return ResponseEntity.ok(product);
+    }
+}

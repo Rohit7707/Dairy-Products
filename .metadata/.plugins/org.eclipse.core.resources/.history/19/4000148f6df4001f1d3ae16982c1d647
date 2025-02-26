@@ -1,0 +1,120 @@
+package com.project.Dashboard_service.Controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.project.Dashboard_service.Dto.DashboardProductDTO;
+import com.project.Dashboard_service.Dto.SellerDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+@RequestMapping("/dashboard")
+public class DashboardController {
+
+    // In-memory list for demo purposes
+    private final List<DashboardProductDTO> dairyProducts = new ArrayList<>();
+
+    public DashboardController() {
+        // Initialize with dummy data matching the expected JSON format
+
+        // Product 1: Whole Milk
+        DashboardProductDTO product1 = new DashboardProductDTO();
+        product1.setProduct_id(101);
+        product1.setName("Whole Milk");
+        product1.setBrand("FreshFarm");
+        product1.setCategory("Milk");
+        product1.setPrice(3.99);
+        product1.setQuantity("1L");
+        List<SellerDTO> sellers1 = new ArrayList<>();
+        SellerDTO seller1 = new SellerDTO();
+        seller1.setSeller_id(1);
+        seller1.setName("Dairy Delights");
+        seller1.setLocation("New York, USA");
+        SellerDTO seller2 = new SellerDTO();
+        seller2.setSeller_id(2);
+        seller2.setName("Farm Fresh Supply");
+        seller2.setLocation("Los Angeles, USA");
+        sellers1.add(seller1);
+        sellers1.add(seller2);
+        product1.setSellers(sellers1);
+
+        // Product 2: Cheddar Cheese
+        DashboardProductDTO product2 = new DashboardProductDTO();
+        product2.setProduct_id(102);
+        product2.setName("Cheddar Cheese");
+        product2.setBrand("Golden Dairy");
+        product2.setCategory("Cheese");
+        product2.setPrice(5.49);
+        product2.setQuantity("200g");
+        List<SellerDTO> sellers2 = new ArrayList<>();
+        SellerDTO seller3 = new SellerDTO();
+        seller3.setSeller_id(3);
+        seller3.setName("Cheese Haven");
+        seller3.setLocation("Chicago, USA");
+        SellerDTO seller4 = new SellerDTO();
+        seller4.setSeller_id(4);
+        seller4.setName("Organic Dairy Mart");
+        seller4.setLocation("Houston, USA");
+        sellers2.add(seller3);
+        sellers2.add(seller4);
+        product2.setSellers(sellers2);
+
+        // Product 3: Greek Yogurt
+        DashboardProductDTO product3 = new DashboardProductDTO();
+        product3.setProduct_id(103);
+        product3.setName("Greek Yogurt");
+        product3.setBrand("Nature's Best");
+        product3.setCategory("Yogurt");
+        product3.setPrice(4.29);
+        product3.setQuantity("500g");
+        List<SellerDTO> sellers3 = new ArrayList<>();
+        SellerDTO seller5 = new SellerDTO();
+        seller5.setSeller_id(5);
+        seller5.setName("Healthy Dairy Store");
+        seller5.setLocation("San Francisco, USA");
+        SellerDTO seller6 = new SellerDTO();
+        seller6.setSeller_id(6);
+        seller6.setName("Pure Dairy Products");
+        seller6.setLocation("Seattle, USA");
+        sellers3.add(seller5);
+        sellers3.add(seller6);
+        product3.setSellers(sellers3);
+
+        dairyProducts.add(product1);
+        dairyProducts.add(product2);
+        dairyProducts.add(product3);
+    }
+
+    // GET endpoint: Users can view dashboard products
+    @GetMapping("/products")
+    public ResponseEntity<?> getDashboardProducts() {
+        // Wrap the products in an object with key "dairy_products"
+        return ResponseEntity.ok(new DashboardResponse(dairyProducts));
+    }
+
+    // POST endpoint: Sellers can add a new product
+    @PostMapping("/products")
+    public ResponseEntity<DashboardProductDTO> addDashboardProduct(@RequestBody DashboardProductDTO product) {
+        dairyProducts.add(product);
+        return ResponseEntity.ok(product);
+    }
+
+    // Inner class to wrap the response in the expected JSON format
+    public static class DashboardResponse {
+        private List<DashboardProductDTO> dairy_products;
+
+        public DashboardResponse(List<DashboardProductDTO> dairy_products) {
+            this.dairy_products = dairy_products;
+        }
+
+        public List<DashboardProductDTO> getDairy_products() {
+            return dairy_products;
+        }
+
+        public void setDairy_products(List<DashboardProductDTO> dairy_products) {
+            this.dairy_products = dairy_products;
+        }
+    }
+}

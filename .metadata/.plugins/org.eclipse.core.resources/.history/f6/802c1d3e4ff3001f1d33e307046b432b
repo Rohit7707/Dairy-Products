@@ -1,0 +1,99 @@
+package com.project.ApiGateway.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.List;
+
+@Component
+public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+
+    // Inject the secret key from configuration
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    // Define endpoints to bypass JWT validation (adjust as needed)
+    private static final List<String> EXCLUDED_URLS = List.of(
+            "/api/authenticate", 
+            "/api/adduser", 
+            "/auth/", 
+            "/v3/api-docs", 
+            "/swagger-ui", 
+            "/swagger-ui.html"
+    );
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        String path = exchange.getRequest().getURI().getPath();
+
+        // Bypass JWT validation for allowed endpoints
+        if (isExcluded(path)) {
+            return chain.filter(exchange);
+        }
+
+        // Get the Authorization header
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return response.setComplete();
+        }
+
+        String token = authHeader.substring(7);
+        if (!validateToken(token)) {
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return response.setComplete();
+        }
+
+        // Optionally, you can set the authenticated principal in the exchange attributes
+        // For simplicity, we just pass the request along if the token is valid.
+        return chain.filter(exchange);
+    }
+
+    private boolean isExcluded(String path) {
+        // Check if the path starts with any excluded endpoints
+        return EXCLUDED_URLS.stream().anyMatch(path::startsWith);
+    }
+
+    // Validate the JWT token (checks signature and expiration)
+    private boolean validateToken(String token) {
+        try {
+            Key key = getSigningKey();
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            // Check if token is expired
+            return !claims.getExpiration().before(new Date());
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    // Helper method to retrieve the signing key
+    private Key getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    @Override
+    public int getOrder() {
+        return -1; // High precedence so it runs before other filters
+    }
+}

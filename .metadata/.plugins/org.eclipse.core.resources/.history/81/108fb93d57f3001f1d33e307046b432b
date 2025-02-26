@@ -1,0 +1,20 @@
+package com.project.Dashboard_service.Dto;
+
+
+public class DashboardProductDTO {
+    private String productId;
+    private String name;
+    private double price;
+    private String listedBy; // Seller identifier
+
+    public DashboardProductDTO() {}
+
+    public DashboardProductDTO(String productId, String name, double price, String listedBy) {
+        this.productId = productId;
+        this.name = name;
+        this.price = price;
+        this.listedBy = listedBy;
+    }
+    // Getters and Setters...
+}
+

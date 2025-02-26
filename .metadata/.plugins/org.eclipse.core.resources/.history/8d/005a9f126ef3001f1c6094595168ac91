@@ -1,0 +1,20 @@
+package com.project.ApiGateway.Controller;
+
+
+
+import com.project.ApiGateway.dto.UserDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+public class UserController {
+
+    // In a real application, you would inject a service to handle user registration.
+    @PostMapping("/adduser")
+    public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO) {
+        // Simulate adding the user (e.g., saving to a database)
+        // For demo, simply return a success message.
+        return ResponseEntity.ok("User registered successfully.");
+    }
+}

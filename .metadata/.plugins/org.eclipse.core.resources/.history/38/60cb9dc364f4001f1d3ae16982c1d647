@@ -1,0 +1,5 @@
+package com.project.Product_service.Dto;
+
+public class seller {
+
+}
