@@ -1,7 +1,5 @@
 package com.project.Dashboard_service.Dto;
 
-
-
 import lombok.Data;
 
 @Data
